@@ -25,15 +25,11 @@ export function SignIn() {
   const { signIn, isLoggingIn } = useAuth();
   const theme = useTheme();
 
-  // creates a function to handle sign in
-  // try to call and wait signIn
-  // if fails, display an Alert with the title "Erro SignIn" and message "Ocorreu um erro ao tentar logar no app"
-
   async function handleSignInWithTwitch() {
     try {
       await signIn();
     } catch (error) {
-      Alert.alert("Erro SignIn", "Ocorreu um erro ao tentar logar no ap");
+      Alert.alert("Erro SignIn", "Ocorreu um erro ao tentar logar no app");
     }
   }
 

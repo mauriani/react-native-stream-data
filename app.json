@@ -3,7 +3,7 @@
   "displayName": "stream.data",
   "expo": {
     "name": "stream.data",
-    "scheme": "streamData",
+    "scheme": "stream.data",
     "slug": "streamData",
     "version": "1.0.0",
     "assetBundlePatterns": ["**/*"],

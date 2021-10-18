@@ -66,8 +66,6 @@ function AuthProvider({ children }: AuthProviderData) {
       // STATE - generate random 30-length string using generateRandom() with "size" set to 30
       const STATE = generateRandom(30);
 
-      const CLIENT = CLIENT_ID;
-
       // assemble authUrl with twitchEndpoint authorization, client_id,
       // redirect_uri, response_type, scope, force_verify and state
 
@@ -89,18 +87,29 @@ function AuthProvider({ children }: AuthProviderData) {
         response.type === "success" &&
         response.params.error !== "access_denied"
       ) {
-        if (response.params.state !== "STATE") {
+        if (response.params.state !== STATE) {
           throw new Error("Invalid state value");
         } else {
-          api.defaults.headers.authorization = `Bearer ${response.params.access_toke}`;
+          const storagedToken = response.params.access_token;
+
+          api.defaults.headers.authorization = `Bearer ${response.params.access_token}`;
+
+          const userResponse = await api.get("/users");
+
+          const user = userResponse.data.data[0];
+
+          console.log(user);
+
+          setUser({
+            id: user.id,
+            display_name: user.display_name,
+            email: user.email,
+            profile_image_url: user.profile_image_url,
+          });
+
+          setUserToken(storagedToken);
         }
       }
-
-      // add access_token to request's authorization header
-
-      // call Twitch API's users route
-      // set user state with response from Twitch API's route "/users"
-      // set userToken state with response's access_token from startAsync
     } catch (error) {
       throw new Error();
     } finally {
@@ -111,18 +120,27 @@ function AuthProvider({ children }: AuthProviderData) {
   async function signOut() {
     try {
       // set isLoggingOut to true
+      setIsLoggingOut(true);
       // call revokeAsync with access_token, client_id and twitchEndpoint revocation
+      await revokeAsync(
+        { token: userToken, clientId: CLIENT_ID },
+        { revocationEndpoint: twitchEndpoints.revocation }
+      );
     } catch (error) {
     } finally {
       // set user state to an empty User object
+      setUser({} as User);
       // set userToken state to an empty string
+      setUserToken("");
       // remove "access_token" from request's authorization header
+      delete api.defaults.headers.authorization;
       // set isLoggingOut to false
+      setIsLoggingOut(false);
     }
   }
 
   useEffect(() => {
-    // add client_id to request's "Client-Id" header
+    api.defaults.headers["Client-Id"] = CLIENT_ID;
   }, []);
 
   return (
